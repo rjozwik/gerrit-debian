@@ -1,0 +1,86 @@
+#!/bin/sh
+# kFreeBSD do not accept scripts as interpreters, using #!/bin/sh and sourcing.
+if [ true != "$INIT_D_SCRIPT_SOURCED" ] ; then
+    set "$0" "$@"; INIT_D_SCRIPT_SOURCED=true . /lib/init/init-d-script
+fi
+### BEGIN INIT INFO
+# Provides:          gerrit
+# Required-Start:    $remote_fs $network
+# Required-Stop:     $remote_fs $network
+# Should-Start:      $named
+# Should-Stop:       $named
+# Default-Start:     2 3 4 5
+# Default-Stop:      0 1 6
+# Short-Description: Gerrit code review server
+# Description:       Gerrit is a web-based software for code review, built
+#                    for and on top of Git version control system.
+### END INIT INFO
+
+# Author: Radosław Józwik <timeshift@spelunca.net>
+
+DESC="code review server"
+NAME="gerrit"
+
+DEFAULT=/etc/default/$NAME
+PIDFILE=/run/$NAME.pid
+DAEMON=none
+
+# Use settings from default file
+if [ -f "$DEFAULT" ]; then
+	. "$DEFAULT"
+fi
+
+GERRIT_USER=${GERRIT_USER:=gerrit}
+GERRIT_SITE=${GERRIT_SITE:=/var/lib/gerrit}
+GERRIT_STARTUP_TIMEOUT=${GERRIT_STARTUP_TIMEOUT:=90}
+
+JAVA_CMD=${JAVA_CMD:=/usr/bin/java}
+JAVA_OPTS=${JAVA_OPTS:="-Xmx1g -Djava.awt.headless=true"}
+
+GERRIT_WAR="$GERRIT_SITE/bin/gerrit.war"
+GERRIT_RUN="$GERRIT_SITE/logs/gerrit.run" # Do not change! Hardcoded in Gerrit source code.
+
+# Exit if the package is not installed (might not be if it was removed, not purged)
+[ -f "$GERRIT_WAR" ] || { log_failure_msg "$NAME package not installed"; exit 1; }
+
+[ -x "$JAVA_CMD" ] || { log_failure_msg "java executable not found"; exit 1; }
+
+is_running() {
+	[ -f $PIDFILE ] || return 1
+	pid=`cat $PIDFILE`
+	ps --pid $pid > /dev/null 2>&1 || return 1
+	return 0
+}
+
+do_start_cmd_override() {
+	start-stop-daemon --start --quiet --pidfile "$PIDFILE" --exec "$JAVA_CMD" --test || return 1
+	run_id=`date +%s`.$$
+	GERRIT_TMP=/var/cache/gerrit/tmp start-stop-daemon --start --quiet --background \
+		--make-pidfile --pidfile "$PIDFILE" --chuid "$GERRIT_USER" --chdir "$GERRIT_SITE" \
+		--exec "$JAVA_CMD" -- $JAVA_OPTS -jar "$GERRIT_WAR" daemon \
+		--site-path "$GERRIT_SITE" --run-id=$run_id
+
+	timeout=$GERRIT_STARTUP_TIMEOUT
+	while is_running && [ $timeout -gt 0 ]; do
+		sleep 2
+		if [ "x$run_id" = "x`cat $GERRIT_RUN 2>/dev/null`" ]; then
+			return 0
+		fi
+		timeout=`expr $timeout - 2`
+	done
+
+	return 2
+}
+
+do_stop_cmd_override() {
+	start-stop-daemon --stop --quiet --pidfile "$PIDFILE" --retry=HUP/30/KILL/5 
+	RETVAL="$?"
+	[ "$RETVAL" = 2 ] && return 2
+	rm -f "$PIDFILE" "GERRIT_RUN"
+	return $RETVAL
+}
+
+do_status_override() {
+	status_of_proc -p "$PIDFILE" "$JAVA_CMD" "$NAME" && return 0 || return $?
+}
+

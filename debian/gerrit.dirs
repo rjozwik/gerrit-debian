@@ -1,0 +1,12 @@
+etc/gerrit
+var/cache/gerrit
+var/cache/gerrit/cache
+var/cache/gerrit/index
+var/cache/gerrit/tmp
+var/lib/gerrit
+var/lib/gerrit/bin
+var/lib/gerrit/data
+var/lib/gerrit/lib
+var/lib/gerrit/plugins
+var/lib/gerrit/static
+var/log/gerrit

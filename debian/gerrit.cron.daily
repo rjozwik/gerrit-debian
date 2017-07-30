@@ -1,0 +1,18 @@
+#!/bin/sh
+
+NAME=gerrit
+DEFAULT=/etc/default/$NAME
+
+# Use settings from default file
+if [ -f "$DEFAULT" ]; then
+	. "$DEFAULT"
+fi
+
+# Default number of days to keep old log files
+LOGFILE_DAYS=${LOGFILE_DAYS:=30}
+
+if [ -d /var/log/$NAME ]; then
+	find /var/log/$NAME/ -name "*_log.????-??-??.gz" -mtime +$LOGFILE_DAYS -print0 \
+		| xargs --no-run-if-empty --null rm -f --
+fi
+

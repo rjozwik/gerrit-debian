@@ -14,6 +14,7 @@ Pre-Depends: wget
 Depends: adduser, openssh-client,
  openjdk-8-jre-headless | java8-runtime-headless,
  ${shlibs:Depends}, ${misc:Depends}
+Suggests: apache2, postgresql
 Description: Web-based code review tool for Git based projects
  Gerrit is a web-based software for code review, built for and on top of
  Git version control system. Gerrit list of features include side-by-side

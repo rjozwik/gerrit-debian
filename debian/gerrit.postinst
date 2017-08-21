@@ -26,7 +26,7 @@ case "$1" in
 				--install-all-plugins > /dev/null 2>&1
 			echo " OK"
 
-			# Fix permissions of plugin files installed by "gerrit.war innit"
+			# Fix permissions of plugin files installed by "gerrit.war init"
 			chmod 644 /var/lib/gerrit/plugins/*
 
 			# Recreate link, because "gerrit.war init" will overwrite it with gerrit.sh

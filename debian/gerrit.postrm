@@ -6,6 +6,10 @@ case "$1" in
 	remove)
 		rm -rf /var/lib/gerrit/bin
 		rm -rf /var/cache/gerrit
+
+		for i in commit-message-length-validator download-commands hooks replication reviewnotes singleusergroup; do
+			rm -f /var/lib/gerrit/plugins/$i.jar
+		done
 	;;
 
 	purge)

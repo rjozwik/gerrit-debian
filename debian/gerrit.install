@@ -1,2 +1,3 @@
+gerrit.war var/lib/gerrit/bin
 debian/etc/gerrit/gerrit.config etc/gerrit
 debian/bin/maintain.sh var/lib/gerrit/bin

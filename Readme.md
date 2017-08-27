@@ -1,7 +1,7 @@
-# Gerrit installer for Debian/Ubuntu
+# Gerrit package for Debian/Ubuntu
 
-[Gerrit](https://www.gerritcodereview.com/) code review installer package for 
-Debian and Ubuntu.
+[Gerrit](https://www.gerritcodereview.com/) code review package for Debian
+and Ubuntu.
 
 ## Getting Started
 

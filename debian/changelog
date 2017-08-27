@@ -1,4 +1,12 @@
-gerrit-installer (2.14.1) unstable; urgency=medium
+gerrit (2.14.3) unstable; urgency=medium
+
+  * New upstream release.
+  * Include my own build of gerrit.war, instead of downloading it during
+    package installation.
+
+ -- Radosław Józwik <timeshift@spelunca.net>  Sun, 27 Aug 2017 22:05:36 +0000
+
+gerrit (2.14.1) unstable; urgency=medium
 
   * Initial release.
 

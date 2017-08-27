@@ -15,10 +15,6 @@ case "$1" in
 			   --ingroup gerrit --no-create-home --home /var/lib/gerrit gerrit
 		fi
 
-		if [ -f /var/cache/gerrit/gerrit.war ]; then
-			mv -f /var/cache/gerrit/gerrit.war /var/lib/gerrit/bin/gerrit.war
-		fi
-
 		if [ ! -f /var/lib/gerrit/bin/gerrit.sh ]; then
 			echo -n "Initializing Gerrit site under /var/lib/gerit ..."
 			GERRIT_TMP=/var/cache/gerrit/tmp java -jar /var/lib/gerrit/bin/gerrit.war init \

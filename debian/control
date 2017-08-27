@@ -1,4 +1,4 @@
-Source: gerrit-installer
+Source: gerrit
 Section: devel
 Priority: extra
 Maintainer: Radosław Józwik <timeshift@spelunca.net>
@@ -10,7 +10,6 @@ Vcs-Browser: https://gerrit.googlesource.com/gerrit
 
 Package: gerrit
 Architecture: all
-Pre-Depends: wget
 Depends: adduser, openssh-client,
  openjdk-8-jre-headless | java8-runtime-headless,
  ${shlibs:Depends}, ${misc:Depends}

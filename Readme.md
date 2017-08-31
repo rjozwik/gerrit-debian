@@ -23,7 +23,7 @@ apt install gerrit
 
 2. Install dependencies
 ```
-apt install wget openssh-client openjdk-8-jre-headless
+apt install openssh-client openjdk-8-jre-headless
 ```
 
 3. Install Gerrit

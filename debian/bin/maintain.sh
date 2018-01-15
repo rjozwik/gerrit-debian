@@ -11,13 +11,14 @@ if [ -f "$DEFAULT" ]; then
     . "$DEFAULT"
 fi
 
-GERRIT_USER=${GERRIT_USER:=gerrit}
-GERRIT_SITE=${GERRIT_SITE:=/var/lib/gerrit}
-GERRIT_CACHE=${GERRIT_CACHE:=/var/cache/gerrit}
+JAVA_CMD=${JAVA_CMD:=/usr/bin/java}
+
+GERRIT_USER=gerrit
+GERRIT_GROUP=gerrit
+GERRIT_SITE=/var/lib/gerrit
+GERRIT_CACHE=/var/cache/gerrit
 
 GERRIT_WAR="$GERRIT_SITE/bin/gerrit.war"
-
-JAVA_CMD=${JAVA_CMD:=/usr/bin/java}
 
 # Exit if the package is not installed (might not be if it was removed, not purged)
 [ -f "$GERRIT_WAR" ] || { echo "$NAME package not installed"; exit 1; }
@@ -50,7 +51,7 @@ case "$1" in
 		# Recreate link, because "gerrit.war init" will overwrite it with gerrit.sh
 		ln -sf /etc/init.d/gerrit "$GERRIT_SITE"/bin/gerrit.sh
 
-		chown -R gerrit:gerrit /etc/gerrit "$GERRIT_SITE" "$GERRIT_CACHE"
+		chown -R $GERRIT_USER:$GERRIT_GROUP /etc/gerrit "$GERRIT_SITE" "$GERRIT_CACHE"
 	;;
 
 	site-reindex)
@@ -59,12 +60,12 @@ case "$1" in
 			exit 1
 		fi
 
-        echo -n "Rebuilding Gerrit secondary index ..."
-        GERRIT_TMP="$GERRIT_CACHE/tmp" java -jar "$GERRIT_WAR" reindex \
-            --site-path "$GERRIT_SITE" > /dev/null 2>&1
-        echo " OK"
+		echo -n "Rebuilding Gerrit secondary index ..."
+		GERRIT_TMP="$GERRIT_CACHE/tmp" java -jar "$GERRIT_WAR" reindex \
+			--site-path "$GERRIT_SITE" > /dev/null 2>&1
+		echo " OK"
 
-		chown -R gerrit:gerrit "$GERRIT_SITE" "$GERRIT_CACHE"
+		chown -R $GERRIT_USER:$GERRIT_GROUP "$GERRIT_SITE" "$GERRIT_CACHE"
 	;;
 
 	*)

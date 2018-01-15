@@ -30,12 +30,12 @@ if [ -f "$DEFAULT" ]; then
 	. "$DEFAULT"
 fi
 
-GERRIT_USER=${GERRIT_USER:=gerrit}
-GERRIT_SITE=${GERRIT_SITE:=/var/lib/gerrit}
-GERRIT_STARTUP_TIMEOUT=${GERRIT_STARTUP_TIMEOUT:=90}
-
 JAVA_CMD=${JAVA_CMD:=/usr/bin/java}
 JAVA_OPTS=${JAVA_OPTS:="-Xmx1g -Djava.awt.headless=true"}
+
+GERRIT_USER=gerrit
+GERRIT_SITE=/var/lib/gerrit
+GERRIT_STARTUP_TIMEOUT=90
 
 GERRIT_WAR="$GERRIT_SITE/bin/gerrit.war"
 GERRIT_RUN="$GERRIT_SITE/logs/gerrit.run" # Do not change! Hardcoded in Gerrit source code.

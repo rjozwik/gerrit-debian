@@ -1,6 +1,3 @@
-# Path to the Gerrit site to run
-#GERRIT_SITE=/var/lib/gerrit
-
 # Path to the Java binary
 #JAVA_CMD=/usr/bin/java
 

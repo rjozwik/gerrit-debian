@@ -20,6 +20,8 @@ GERRIT_CACHE=/var/cache/gerrit
 
 GERRIT_WAR="$GERRIT_SITE/bin/gerrit.war"
 
+LOGFILE=/var/log/gerrit/maintenance.log
+
 # Exit if the package is not installed (might not be if it was removed, not purged)
 [ -f "$GERRIT_WAR" ] || { echo "$NAME package not installed"; exit 1; }
 
@@ -27,9 +29,9 @@ GERRIT_WAR="$GERRIT_SITE/bin/gerrit.war"
 
 is_running() {
 	[ -f $PIDFILE ] || return 1
-    pid=`cat $PIDFILE`
-    ps --pid $pid > /dev/null 2>&1 || return 1
-    return 0
+	pid=`cat $PIDFILE`
+	ps --pid $pid > /dev/null 2>&1 || return 1
+	return 0
 }
 
 
@@ -40,9 +42,13 @@ case "$1" in
 			exit 1
 		fi
 
-		echo -n "Initializing Gerrit site under $GERRIT_SITE ..."
+		echo "" >> $LOGFILE
+		echo "`date +"%Y-%m-%d %H:%M:%S"` calling site-init at $GERRIT_SITE" >> $LOGFILE
+
+		echo -n "Initializing Gerrit site at $GERRIT_SITE ..."
 		GERRIT_TMP="$GERRIT_CACHE/tmp" java -jar "$GERRIT_WAR" init \
-			--site-path "$GERRIT_SITE" --batch --no-auto-start > /dev/null 2>&1
+			--site-path "$GERRIT_SITE" --batch --no-auto-start \
+			>> $LOGFILE 2>&1 || { echo " ERROR (see $LOGFILE)"; exit 1; }
 		echo " OK"
 
 		# Fix permissions of plugin files as "gerrit.war init" modified them
@@ -60,9 +66,13 @@ case "$1" in
 			exit 1
 		fi
 
+		echo "" >> $LOGFILE
+		echo "`date +"%Y-%m-%d %H:%M:%S"` calling site-reindex at $GERRIT_SITE" >> $LOGFILE
+
 		echo -n "Rebuilding Gerrit secondary index ..."
 		GERRIT_TMP="$GERRIT_CACHE/tmp" java -jar "$GERRIT_WAR" reindex \
-			--site-path "$GERRIT_SITE" > /dev/null 2>&1
+			--site-path "$GERRIT_SITE" \
+			>> $LOGFILE 2>&1 || { echo " ERROR (see $LOGFILE)"; exit 1; }
 		echo " OK"
 
 		chown -R $GERRIT_USER:$GERRIT_GROUP "$GERRIT_SITE" "$GERRIT_CACHE"

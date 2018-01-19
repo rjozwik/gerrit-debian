@@ -4,10 +4,6 @@ gerrit for Debian
 * There is a "maintain.sh" script, in /var/lib/gerrit/bin/, provided to ease
   maintenance tasks, like site initialization or reindexing.
 
-* This package performs only one-time site initialization on fresh install.
-  When performing upgrades, you have to consult Gerrit release notes
-  and manually perform site initialization if needed.
-
 * Dependency on openssh-client is required because "gerit.war init" command,
   on fresh install, will generate ssh keys using ssh-keygen binary.
 
@@ -19,4 +15,4 @@ gerrit for Debian
 * Log files, older than 30 days, are removed by cron.daily script. You can
   customize the number of days to keep logs, by editing config in /etc/default.
 
- -- Radosław Józwik <timeshift@spelunca.net>  Wed, 26 Jul 2017 22:08:24 +0200
+ -- Radosław Józwik <timeshift@spelunca.net>  Fri, 19 Jan 2018 22:42:12 +0100

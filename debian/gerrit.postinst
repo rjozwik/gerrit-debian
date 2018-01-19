@@ -4,41 +4,62 @@ set -e
 
 case "$1" in
     configure)
+		GERRIT_USER="gerrit"
+		GERRIT_GROUP="gerrit"
+		GERRIT_SITE="/var/lib/gerrit"
+		GERRIT_CACHE="/var/cache/gerrit"
+		GERRIT_LOG="/var/log/gerrit"
+
+		GERRIT_WAR="$GERRIT_SITE/bin/gerrit.war"
+		LOGFILE="$GERRIT_LOG/maintenance.log"
+
 		# Create gerrit group if it doesn't exist
-		if ! getent group gerrit > /dev/null 2>&1 ; then
-			addgroup --quiet --system gerrit
+		if ! getent group "$GERRIT_GROUP" > /dev/null 2>&1 ; then
+			addgroup --quiet --system "$GERRIT_GROUP"
 		fi
 
 		# Create gerrit user if it doesn't exist
-		if ! id gerrit > /dev/null 2>&1 ; then
+		if ! id "$GERRIT_USER" > /dev/null 2>&1 ; then
 			adduser --quiet --system --disabled-password --shell /bin/false \
-			   --ingroup gerrit --no-create-home --home /var/lib/gerrit gerrit
+			   --ingroup "$GERRIT_GROUP" --no-create-home --home "$GERRIT_SITE" "$GERRIT_USER"
 		fi
 
-		if [ ! -f /var/lib/gerrit/bin/gerrit.sh ]; then
-			echo -n "Initializing Gerrit site under /var/lib/gerit ..."
-			GERRIT_TMP=/var/cache/gerrit/tmp java -jar /var/lib/gerrit/bin/gerrit.war init \
-				--site-path /var/lib/gerrit --batch --no-auto-start \
-				--install-all-plugins > /dev/null 2>&1
-			echo " OK"
+		SITE_INIT_CMD_EXT=""
 
-			# Fix permissions of plugin files installed by "gerrit.war init"
-			chmod 644 /var/lib/gerrit/plugins/*
-
-			# Recreate link, because "gerrit.war init" will overwrite it with gerrit.sh
-			ln -sf /etc/init.d/gerrit /var/lib/gerrit/bin/gerrit.sh
+		# Enable all core plugins on fresh package install
+		if [ ! -f "$GERRIT_SITE/bin/gerrit.sh" ]; then
+			SITE_INIT_CMD_EXT="--install-all-plugins"
 		fi
 
-		# Reindex to avoid "No index versions ready" when starting Gerrit with stale index
-		echo -n "Rebuilding Gerrit secondary index ..."
-		GERRIT_TMP=/var/cache/gerrit/tmp java -jar /var/lib/gerrit/bin/gerrit.war reindex \
-			--site-path /var/lib/gerrit > /dev/null 2>&1
+		echo "" >> $LOGFILE
+		echo "`date +"%Y-%m-%d %H:%M:%S"` calling site-init at $GERRIT_SITE" >> $LOGFILE
+
+		echo -n "Initializing Gerrit site at $GERRIT_SITE ..."
+		GERRIT_TMP="$GERRIT_CACHE/tmp" java -jar "$GERRIT_WAR" init \
+			--site-path "$GERRIT_SITE" --batch --no-auto-start $SITE_INIT_CMD_EXT \
+			>> $LOGFILE 2>&1 || { echo " ERROR (see $LOGFILE)"; exit 1; }
 		echo " OK"
 
-		chown -R gerrit:gerrit /etc/gerrit /var/cache/gerrit /var/lib/gerrit
+		# Fix permissions of plugin files installed by "gerrit.war init"
+		chmod 644 "$GERRIT_SITE"/plugins/*
 
-		chown -R gerrit:adm /var/log/gerrit
-		chmod 2750 /var/log/gerrit
+		# Recreate link, because "gerrit.war init" will overwrite it with gerrit.sh
+		ln -sf /etc/init.d/gerrit "$GERRIT_SITE"/bin/gerrit.sh
+
+		# Reindex to avoid "No index versions ready" when starting Gerrit with stale index
+		echo "" >> $LOGFILE
+		echo "`date +"%Y-%m-%d %H:%M:%S"` calling site-reindex at $GERRIT_SITE" >> $LOGFILE
+
+		echo -n "Rebuilding Gerrit secondary index ..."
+		GERRIT_TMP="$GERRIT_CACHE/tmp" java -jar "$GERRIT_WAR" reindex \
+			--site-path "$GERRIT_SITE" \
+			>> $LOGFILE 2>&1 || { echo " ERROR (see $LOGFILE)"; exit 1; }
+		echo " OK"
+
+		chown -R "$GERRIT_USER":"$GERRIT_GROUP" /etc/gerrit "$GERRIT_SITE" "$GERRIT_CACHE"
+
+		chown -R "$GERRIT_USER":adm "$GERRIT_LOG"
+		chmod 2750 "$GERRIT_LOG"
     ;;
 
     abort-upgrade|abort-remove|abort-deconfigure)

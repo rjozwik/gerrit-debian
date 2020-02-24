@@ -52,7 +52,7 @@ case "$1" in
 
 		echo -n "Rebuilding Gerrit secondary index ..."
 		GERRIT_TMP="$GERRIT_CACHE/tmp" java -jar "$GERRIT_WAR" reindex \
-			--site-path "$GERRIT_SITE" \
+			--site-path "$GERRIT_SITE" --threads 1 \
 			>> $LOGFILE 2>&1 || { echo " ERROR (see $LOGFILE)"; exit 1; }
 		echo " OK"
 

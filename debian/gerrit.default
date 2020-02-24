@@ -2,7 +2,7 @@
 #JAVA_CMD=/usr/bin/java
 
 # Extra startup parameters for JVM
-#JAVA_OPTS="-Xmx1g -Djava.awt.headless=true"
+#JAVA_OPTS="-Xmx1g -Djava.awt.headless=true -Dflogger.backend_factory=com.google.common.flogger.backend.log4j.Log4jBackendFactory#getInstance -Dflogger.logging_context=com.google.gerrit.server.logging.LoggingContext#getInstance"
 
 # Number of days to keep old log files
 #LOGFILE_DAYS=30
